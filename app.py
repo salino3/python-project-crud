@@ -1,15 +1,18 @@
 # pip install psycopg2
 # pip install python-dotenv
+# pip install cryptography
 
 
-from flask import Flask, request
-from psycopg2 import connect
+from flask import Flask, request, jsonify
+from psycopg2 import connect, extras
 from dotenv import load_dotenv
+from cryptography.fernet import Fernet
 import os
 
 load_dotenv()
 
 app = Flask(__name__)
+Fernet.generate_key()
 
 host = os.getenv('HOST')
 port = int(os.getenv('PORT'))
@@ -42,13 +45,18 @@ def create_user():
    new_user = request.get_json()
    username = new_user["username"]
    email = new_user["email"]
-   password = new_user["password"]
-   
+   password = Fernet(Fernet.generate_key()).encrypt(bytes(new_user["password"], 'utf-8'))
    conn = get_connection()
-   cur = conn.cursot()
+   cur = conn.cursor(cursor_factory=extras.RealDictCursor)
 
-   cur.execute("INSERT INTO")
-   return '<p>Creating user</p>'
+   cur.execute('INSERT INTO users (username, email, password) VALUES (%s, %s, %s) RETURNING *',
+                (username, email, password))
+   new_created_user = cur.fetchone()
+   print(new_created_user)
+   conn.commit()
+   cur.close()
+   conn.close()
+   return jsonify(new_created_user)
 
 @app.delete('/api/users/<string:id>')
 def delete_user(id):
