@@ -2,7 +2,7 @@
 # pip install python-dotenv
 
 
-from flask import Flask
+from flask import Flask, request
 from psycopg2 import connect
 from dotenv import load_dotenv
 import os
@@ -39,6 +39,15 @@ def get_users():
 
 @app.post('/api/users')
 def create_user():
+   new_user = request.get_json()
+   username = new_user["username"]
+   email = new_user["email"]
+   password = new_user["password"]
+   
+   conn = get_connection()
+   cur = conn.cursot()
+
+   cur.execute("INSERT INTO")
    return '<p>Creating user</p>'
 
 @app.delete('/api/users/<string:id>')
