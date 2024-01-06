@@ -23,7 +23,6 @@ def get_connection():
 
 
 
-
 @app.get('/')
 def home():
     conn = get_connection()
@@ -31,8 +30,30 @@ def home():
     cur.execute("SELECT 1 + 1")
     result =  cur.fetchone()
     print(result)
-
     return '<h1>Hello World!</h1>'
+
+
+@app.get('/api/users')
+def get_users():
+   return '<p>Getting users</p>'
+
+@app.post('/api/users')
+def create_user():
+   return '<p>Creating user</p>'
+
+@app.delete('/api/users/<string:id>')
+def delete_user(id):
+   return '<p>Deleting user</p>'
+
+@app.put('/api/users/<string:id>')
+def update_user(id):
+    result = int(id) * 10
+    return f'<p>Updating user with ID: {result}</p>'
+
+@app.get('/api/users(<string:id>)')
+def get_user(id):
+   return '<p>Getting user </p>'
+   
 
 
 if __name__ == '__main__':
