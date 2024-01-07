@@ -81,9 +81,18 @@ def update_user(id):
     return f'<p>Updating user with ID: {result}</p>'
 
 
-@app.get('/api/users(<string:id>)')
+@app.get('/api/users/<string:id>')
 def get_user(id):
-   return '<p>Getting user </p>'
+   conn = get_connection()
+   cur = conn.cursor(cursor_factory=extras.RealDictCursor)
+# Important: comma at the end of value for query if is one value, for define tuple
+   cur.execute('SELECT * FROM  users WHERE id = %s', (id,))
+   user = cur.fetchone()
+   
+   if user is None:
+      return jsonify({"message": "User not found"}), 404
+   
+   return jsonify(user)
    
 
 
