@@ -88,11 +88,29 @@ def delete_user(id):
    
    return jsonify(user)
 
+
 # 
 @app.put('/api/users/<string:id>')
 def update_user(id):
-    result = int(id) * 10
-    return f'<p>Updating user with ID: {result}</p>'
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=extras.RealDictCursor)
+    updatedUser = request.get_json()
+    username = updatedUser["username"]
+    email = updatedUser["email"]
+    password = Fernet(Fernet.generate_key()).encrypt(bytes(updatedUser["password"], 'utf-8'))
+
+    cur.execute('UPDATE users SET username = %s, email = %s, password = %s WHERE id = %s RETURNING *', 
+                (username, email, password, id))
+    updatedUser = cur.fetchone()
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    if updatedUser is None:
+      return jsonify({"message": "User not found"}), 404
+
+    return jsonify(updatedUser)
 
 # 
 @app.get('/api/users/<string:id>')
