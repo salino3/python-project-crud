@@ -1,6 +1,8 @@
 # pip install psycopg2
 # pip install python-dotenv
 # pip install cryptography
+# pip install gunicorn
+# pip freeze > requirements.txt
 
 # virtual enviroment -> source venv/Scripts/activate
 
