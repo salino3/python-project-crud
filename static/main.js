@@ -1,6 +1,21 @@
 
 const userForm = document.querySelector("#userForm");
 
+let users = [];
+
+window.addEventListener("DOMContentLoaded", async () => {
+  // users = await fetch("/api/users");
+  // const data = await users.json();
+  users = await fetch("/api/users").then((response) => response.json());
+
+  if(users){
+  renderUsers(users);
+  };
+
+});
+
+
+//
 userForm.addEventListener('submit', async event => {
     event.preventDefault();
     
@@ -31,10 +46,43 @@ userForm.addEventListener('submit', async event => {
 
     const data = await response.json();
 
-    console.log("data->", data);
+    users.unshift(data);
+
+    renderUsers(users);
+
+    console.log("data->", users);
     userForm.reset();
     
 });
 
+
+function renderUsers(users) {
+  console.log("renderUsers ->", users);
+
+  const userList = document.querySelector('#userList');
+
+  userList.innerHTML = '';
+
+  users.forEach(user => {
+    const userItem = document.createElement('li');
+
+    userItem.classList = 'list-group-item list-group-item-dark my-2'
+    userItem.innerHTML = `
+     <header class="d-flex justify-content-between align-items-center">
+      <h3>${user.username}</h3>
+      <div>
+       <button class="btn btn-danger btn-sm">delete</button>
+       <button class="btn btn-secondary btn-sm">edit</button>
+      </div>
+     </header>
+     <p>${user.email}</p>
+     <p class="text-truncate">${user.password}</p>
+    `;
+
+    userList.appendChild(userItem);
+   });
+  
+
+};
 
 
