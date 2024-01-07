@@ -89,28 +89,39 @@ def delete_user(id):
    return jsonify(user)
 
 
-# 
+#
 @app.put('/api/users/<string:id>')
 def update_user(id):
     conn = get_connection()
     cur = conn.cursor(cursor_factory=extras.RealDictCursor)
-    updatedUser = request.get_json()
-    username = updatedUser["username"]
-    email = updatedUser["email"]
-    password = Fernet(Fernet.generate_key()).encrypt(bytes(updatedUser["password"], 'utf-8'))
+    
+    cur.execute('SELECT * FROM users WHERE id = %s', (id,))
+    existing_user = cur.fetchone()
+    
+    if existing_user is None:
+        return jsonify({"message": "User not found"}), 404
 
-    cur.execute('UPDATE users SET username = %s, email = %s, password = %s WHERE id = %s RETURNING *', 
-                (username, email, password, id))
-    updatedUser = cur.fetchone()
+    updated_data = request.get_json()
+
+    for key, value in updated_data.items():
+        existing_user[key] = value
+
+    if 'password' in updated_data:
+        existing_user['password'] = Fernet(Fernet.generate_key()).encrypt(bytes(updated_data['password'], 'utf-8'))
+
+    cur.execute('UPDATE users SET username = %s, email = %s, password = %s WHERE id = %s RETURNING *',
+                (existing_user['username'], existing_user['email'], existing_user['password'], id))
+    updated_user = cur.fetchone()
 
     conn.commit()
     cur.close()
     conn.close()
 
-    if updatedUser is None:
-      return jsonify({"message": "User not found"}), 404
+    if updated_user is None:
+        return jsonify({"message": "User not found"}), 404
 
-    return jsonify(updatedUser)
+    return jsonify(updated_user)
+
 
 # 
 @app.get('/api/users/<string:id>')
