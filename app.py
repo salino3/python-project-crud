@@ -6,7 +6,7 @@
 
 
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from psycopg2 import connect, extras
 from dotenv import load_dotenv
 from cryptography.fernet import Fernet
@@ -27,16 +27,6 @@ def get_connection():
   conn = connect(host=host, port=port, dbname=dbname, user=user, password=password)
   return conn
 
-
-# 
-@app.get('/')
-def home():
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT 1 + 1")
-    result =  cur.fetchone()
-    print(result)
-    return '<h1>Hello World!</h1>'
 
 # 
 @app.get('/api/users')
@@ -139,6 +129,13 @@ def get_user(id):
    
 
 
+# 
+@app.get('/')
+def home():
+    return send_file('static/index.html')
+
+
+ 
 if __name__ == '__main__':
     app.run(debug = True, port = 7000)
 
