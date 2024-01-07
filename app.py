@@ -10,17 +10,17 @@ from flask import Flask, request, jsonify, send_file
 from psycopg2 import connect, extras
 from dotenv import load_dotenv
 from cryptography.fernet import Fernet
-import os
+from os import environ
 
 load_dotenv()
 
 app = Flask(__name__)
 
-host = os.getenv('HOST')
-port = int(os.getenv('PORT'))
-dbname = os.getenv('DB_NAME')
-user = os.getenv('USER')
-password = os.getenv('PASSWORD')
+host = environ.get('HOST')
+port = int(environ.get('PORT'))
+dbname = environ.get('DB_NAME')
+user = environ.get('USER')
+password = environ.get('PASSWORD')
 
 key = Fernet.generate_key()
 cipher_suite = Fernet(key)
