@@ -68,7 +68,8 @@ userForm.addEventListener('submit', async event => {
     const updatedUser = await response.json();
 
     users = users.map((user) => user.id === updatedUser.id ? updatedUser : user);
-    renderUsers(users);
+    editing = false;
+    userId = null;
    };
 
     renderUsers(users);
