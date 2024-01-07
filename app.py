@@ -15,13 +15,16 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
-Fernet.generate_key()
 
 host = os.getenv('HOST')
 port = int(os.getenv('PORT'))
 dbname = os.getenv('DB_NAME')
 user = os.getenv('USER')
 password = os.getenv('PASSWORD')
+
+key = Fernet.generate_key()
+cipher_suite = Fernet(key)
+
 
 def get_connection():
   conn = connect(host=host, port=port, dbname=dbname, user=user, password=password)
@@ -94,13 +97,18 @@ def update_user(id):
     updated_data = request.get_json()
 
     for key, value in updated_data.items():
-        existing_user[key] = value
+        if key == 'password':
+            existing_user[key] = value[:25]
+            existing_user[key] = cipher_suite.encrypt(bytes(existing_user[key], 'utf-8'))
+        else:
+            existing_user[key] = value
+
 
     if 'password' in updated_data:
-        existing_user['password'] = Fernet(Fernet.generate_key()).encrypt(bytes(updated_data['password'], 'utf-8'))
+        existing_user['password'] = Fernet(Fernet.generate_key()).encrypt(bytes(updated_data['password'][:25], 'utf-8'))
 
     cur.execute('UPDATE users SET username = %s, email = %s, password = %s WHERE id = %s RETURNING *',
-                (existing_user['username'], existing_user['email'], existing_user['password'], id))
+                (existing_user['username'], existing_user['email'], existing_user['password'][:25], id))
     updated_user = cur.fetchone()
 
     conn.commit()

@@ -2,6 +2,8 @@
 const userForm = document.querySelector("#userForm");
 
 let users = [];
+let editing = false;
+let userId = null;
 
 //
 window.addEventListener("DOMContentLoaded", async () => {
@@ -33,10 +35,28 @@ userForm.addEventListener('submit', async event => {
     const email = formData.get("email");
     const password = formData.get("password");
 
-    const response = await fetch("/api/users", {
-      method: "POST",
+   if(!editing) {
+     const response = await fetch("/api/users", {
+       method: "POST",
+       headers: {
+         "Content-Type": "application/json",
+       },
+       body: JSON.stringify({
+         username,
+         email,
+         password,
+       }),
+     });
+
+     const data = await response.json();
+
+     users.unshift(data);
+   } else {
+
+    const response = await fetch(`/api/users/${userId}`, {
+      method: "PUT",
       headers: {
-        'Content-Type': "application/json",
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         username,
@@ -45,18 +65,20 @@ userForm.addEventListener('submit', async event => {
       }),
     });
 
-    const data = await response.json();
+    const updatedUser = await response.json();
 
-    users.unshift(data);
+    users = users.map((user) => user.id === updatedUser.id ? updatedUser : user);
+    renderUsers(users);
+   };
 
     renderUsers(users);
 
-    console.log("data->", users);
     userForm.reset();
     
 });
 
 
+//
 function renderUsers(users) {
 
   const userList = document.querySelector('#userList');
@@ -101,6 +123,12 @@ function renderUsers(users) {
       const data = await response.json();
       console.log(data);
 
+      userForm["username"].value = data.username;
+      userForm["email"].value = data.email;
+      userForm["password"].value = data.password;
+
+      editing = true;
+      userId = data.id;
 
     });
 
