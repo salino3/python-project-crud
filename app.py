@@ -2,6 +2,9 @@
 # pip install python-dotenv
 # pip install cryptography
 
+# virtual enviroment -> source venv/Scripts/activate
+
+
 
 from flask import Flask, request, jsonify
 from psycopg2 import connect, extras
@@ -38,7 +41,15 @@ def home():
 
 @app.get('/api/users')
 def get_users():
-   return '<p>Getting users</p>'
+   conn = get_connection()
+   cur = conn.cursor(cursor_factory=extras.RealDictCursor)
+
+   cur.execute('SELECT * FROM users')
+   users = cur.fetchall()
+   cur.close()
+   conn.close()
+   return jsonify(users)
+
 
 @app.post('/api/users')
 def create_user():
@@ -58,14 +69,17 @@ def create_user():
    conn.close()
    return jsonify(new_created_user)
 
+
 @app.delete('/api/users/<string:id>')
 def delete_user(id):
    return '<p>Deleting user</p>'
+
 
 @app.put('/api/users/<string:id>')
 def update_user(id):
     result = int(id) * 10
     return f'<p>Updating user with ID: {result}</p>'
+
 
 @app.get('/api/users(<string:id>)')
 def get_user(id):
