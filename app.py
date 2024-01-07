@@ -40,7 +40,7 @@ def get_users():
    conn.close()
    return jsonify(users)
 
-# 
+#  
 @app.post('/api/users')
 def create_user():
    new_user = request.get_json()
