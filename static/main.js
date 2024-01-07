@@ -58,7 +58,6 @@ userForm.addEventListener('submit', async event => {
 
 
 function renderUsers(users) {
-  console.log("renderUsers ->", users);
 
   const userList = document.querySelector('#userList');
 
@@ -94,6 +93,19 @@ function renderUsers(users) {
        renderUsers(users);
 
     });
+//
+    const btnEdit = userItem.querySelector(".btn-edit");
+
+    btnEdit.addEventListener('click', async () => {
+      const response = await fetch(`/api/users/${user.id}`);
+      const data = await response.json();
+      console.log(data);
+
+
+    });
+
+    
+
 
     userList.appendChild(userItem);
    });
