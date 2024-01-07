@@ -28,7 +28,7 @@ def get_connection():
   return conn
 
 
-
+# 
 @app.get('/')
 def home():
     conn = get_connection()
@@ -38,7 +38,7 @@ def home():
     print(result)
     return '<h1>Hello World!</h1>'
 
-
+# 
 @app.get('/api/users')
 def get_users():
    conn = get_connection()
@@ -50,7 +50,7 @@ def get_users():
    conn.close()
    return jsonify(users)
 
-
+# 
 @app.post('/api/users')
 def create_user():
    new_user = request.get_json()
@@ -70,17 +70,31 @@ def create_user():
    return jsonify(new_created_user)
 
 
+# 
 @app.delete('/api/users/<string:id>')
 def delete_user(id):
-   return '<p>Deleting user</p>'
+   conn = get_connection()
+   cur = conn.cursor(cursor_factory=extras.RealDictCursor)
 
+   cur.execute('DELETE FROM users WHERE ID = %s RETURNING *', (id,))
+   user = cur.fetchone()
 
+   conn.commit()
+   conn.close()
+   cur.close()
+
+   if user is None:
+      return jsonify({"message": "User not found"}), 404
+   
+   return jsonify(user)
+
+# 
 @app.put('/api/users/<string:id>')
 def update_user(id):
     result = int(id) * 10
     return f'<p>Updating user with ID: {result}</p>'
 
-
+# 
 @app.get('/api/users/<string:id>')
 def get_user(id):
    conn = get_connection()
